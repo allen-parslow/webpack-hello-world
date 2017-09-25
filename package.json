@@ -15,8 +15,14 @@
   "author": "Allen Parslow",
   "license": "MIT",
   "devDependencies": {
+    "copy-webpack-plugin": "^4.0.1",
     "css-loader": "^0.28.7",
+    "express": "^4.15.4",
+    "gulp": "^3.9.1",
+    "gulp-concat-css": "^2.3.0",
+    "path": "^0.12.7",
     "style-loader": "^0.18.2",
-    "webpack": "^3.6.0"
+    "webpack": "^3.6.0",
+    "webpack-stream": "^4.0.0"
   }
 }

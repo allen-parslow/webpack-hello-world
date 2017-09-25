@@ -1,18 +1,18 @@
 # Hello World using webpack
 
-TO DO: copy index.html to build or dynamically create it.
-
-# Run with Webpack
+## Run 
 
 ```
-webpack --progress --colors --watch
+gulp; npm start
 ```
 
-Open build/index.html
+TO DO: combine the above steps
 
-# Building with Docker
+## Building with Docker
 
 ```
 sudo docker build -t httpd-hello-word .
 sudo docker run -p 8080:80 httpd-hello-word
 ```
+
+TO DO: combine docker with npm?
