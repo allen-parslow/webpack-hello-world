@@ -1,23 +1,58 @@
-var gulp = require('gulp');
+var gulp = require("gulp");
+var gutil = require("gulp-util");
 
-var concatCss = require('gulp-concat-css');
-var webpack = require('webpack-stream');
+var rm = require("gulp-rm");
+var webpackStream = require("webpack-stream");
+var webpack = require("webpack");
+var WebpackDevServer = require("webpack-dev-server");
+var webpackConfig = require("./webpack.config.js");
 
-gulp.task('build-js', function() {
-  return gulp.src('src/entry.js')
-    .pipe(webpack(require('./webpack.config.js') ))
-    .pipe(gulp.dest('dist/'));
+var path = {
+    "src": {
+        "html": "src/index.html",
+        "webpack": "src/**/*.*",
+        "css": "src/**/*.css"
+    },
+    "dist": {
+        "dir": "dist/",
+        "files": "dist/**/*",  
+        "port": 8080 
+    }    
+};
+
+gulp.task( "clean", function() {
+    return gulp.src(path.dist.files, { read: false })
+      .pipe(rm());
+  })
+
+gulp.task("build", ["build-html"], function() {
+  return gulp.src(path.src.webpack)
+    .pipe(webpackStream(webpackConfig))
+    .pipe(gulp.dest(path.dist.dir));
 });
 
-gulp.task('build-html', function () {
-    return gulp.src('src/index.html')
-      .pipe(gulp.dest('dist/'));
+gulp.task("build-html", function () {
+    return gulp.src(path.src.html)
+      .pipe(gulp.dest(path.dist.dir));
   });
 
-gulp.task('build-css', function () {
-    return gulp.src('src/**/*.css')
-      .pipe(concatCss("app.css"))
-      .pipe(gulp.dest('dist/'));
-  });
+// see https://github.com/webpack/webpack-with-common-libs/blob/master/gulpfile.js
+gulp.task("webpack-dev-server", ["build"], function(callback) {
+	// modify some webpack config options
+	var devServerConfig = Object.create(webpackConfig);
+	devServerConfig.devtool = "eval";
 
-gulp.task('default', ['build-js', 'build-css', 'build-html']);
+	// Start a webpack-dev-server
+	new WebpackDevServer(webpack(devServerConfig), {
+        contentBase: path.dist.dir,
+		stats: {
+			colors: true
+		}
+	}).listen(path.dist.port, "localhost", function(err) {
+		if(err) throw new gutil.PluginError("webpack-dev-server", err);
+        gutil.log("[webpack-dev-server] Starting", 
+            gutil.colors.blue.bold.underline("http://localhost:" + path.dist.port));
+	});
+});
+
+gulp.task("default", ["build", "webpack-dev-server"]);

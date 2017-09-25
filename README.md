@@ -3,14 +3,13 @@
 ## Run 
 
 ```
-gulp; npm start
+npm start
 ```
-
-TO DO: combine the above steps
 
 ## Building with Docker
 
 ```
+gulp build
 sudo docker build -t httpd-hello-word .
 sudo docker run -p 8080:80 httpd-hello-word
 ```

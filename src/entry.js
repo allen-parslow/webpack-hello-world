@@ -1,1 +1,3 @@
-document.write(require("./content/content.js"));
+require("./entry.css");
+
+document.write(require("./hello/hello.js"));
