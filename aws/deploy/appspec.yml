@@ -1,0 +1,18 @@
+version: 0.0
+os: linux
+files:
+  - source: __APP_NAME__.tar
+    destination: /tmp
+hooks:
+  ApplicationStop:
+    - location: kill_container.sh
+      timeout: 20
+      runas: ec2-user
+  AfterInstall:
+    - location: load_image.sh
+      timeout: 10
+      runas: ec2-user
+  ApplicationStart:
+    - location: start_container.sh
+      timeout: 10
+      runas: ec2-user

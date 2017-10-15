@@ -1,0 +1,28 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo "$APPLICATION_NAME - $DEPLOYMENT_GROUP_NAME v$APP_VERSION"
+      - echo Install Phase
+      - aws deploy get-application --application-name ClusterOps # fail-fast check for deploy role & app
+      - curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+      - sudo apt-get install -y nodejs
+      - sudo apt-get install -y build-essential
+  pre_build:
+    commands:
+      - echo Pre-build Phase
+      - npm --version
+      - node --version
+      - docker --version
+      - aws --version
+      - npm install
+      - npm run clean
+  build:
+    commands:
+      - echo Build Phase
+      - npm run build
+  post_build:
+    commands:
+      - echo Post-build Phase
+      - npm run publish-aws
