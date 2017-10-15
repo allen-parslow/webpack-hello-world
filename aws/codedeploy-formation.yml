@@ -1,10 +1,27 @@
 AWSTemplateFormatVersion: 2010-09-09
 Parameters: 
-  StackTypeParam: 
+  StackEnvType: 
     Type: String
     Default: dev
     Description: A classifier on the stack-name used to tag instances.
+  GitRepoUrl: 
+    Type: String
+    Description: Github repository url.
 Resources:
+  CodeBuildSPA:
+    Type: 'AWS::CodeBuild::Project'
+    Properties:
+      Name: !Ref AWS::StackName
+      ServiceRole: 'builder'
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: 'aws/codebuild/docker:1.12.1'
+        Type: LINUX_CONTAINER
+      Artifacts:
+        Type: no_artifacts
+      Source:
+        Type: GITHUB
+        Location: !Ref 'GitRepoUrl'
   CodeDeploySPA:
     Type: 'AWS::CodeDeploy::Application'
     Properties:
@@ -12,14 +29,14 @@ Resources:
   DeploymentGroupSPA:
     Type: 'AWS::CodeDeploy::DeploymentGroup'
     Properties:
-      DeploymentGroupName: !Join [ '-', [ !Ref 'AWS::StackName', !Ref 'StackTypeParam' ]]
+      DeploymentGroupName: !Join [ '-', [ !Ref 'AWS::StackName', !Ref 'StackEnvType' ]]
       ApplicationName: !Ref AWS::StackName
       DeploymentConfigName: CodeDeployDefault.AllAtOnce
       ServiceRoleArn: !Join [ ':', [ 'arn:aws:iam:', !Ref 'AWS::AccountId', 'role/deploy' ]]
       Ec2TagFilters:
         - Type: KEY_AND_VALUE
           Key: Name
-          Value: !Join [ '-', [ !Ref 'AWS::StackName', !Ref 'StackTypeParam' ]]
+          Value: !Join [ '-', [ !Ref 'AWS::StackName', !Ref 'StackEnvType' ]]
     DependsOn:
       - CodeDeploySPA
   USEast1AmazonLinuxEC2SPA:
@@ -39,7 +56,7 @@ Resources:
       IamInstanceProfile: deploy-target
       Tags:
         - Key: Name
-          Value: !Join [ '-', [ !Ref 'AWS::StackName', !Ref 'StackTypeParam' ]]
+          Value: !Join [ '-', [ !Ref 'AWS::StackName', !Ref 'StackEnvType' ]]
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash -x

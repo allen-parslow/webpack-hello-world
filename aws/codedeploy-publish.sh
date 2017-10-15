@@ -10,13 +10,13 @@ artifact="${npm_package_name}_v${npm_package_version}__$timestamp"
 echo "Publishing $artifact"
 ls -lth
 [ -d 'build/dist/bundle/' ] && rm -r build/dist/bundle/ || :
-mkdir build/dist/bundle/
+mkdir -p build/dist/bundle/ || true
 cp aws/deploy/* build/dist/bundle/
 sed -i "s/__APP_NAME__/$npm_package_name/g" build/dist/bundle/*.sh
 sed -i "s/__APP_NAME__/$npm_package_name/g" build/dist/bundle/*.yml
 cat build/dist/bundle/*.sh
 
-cp aws/Dockerfile build/
+cp Dockerfile build/
 sudo docker build -t $npm_package_name build/
 
 sudo docker save $npm_package_name > build/dist/bundle/$npm_package_name.tar

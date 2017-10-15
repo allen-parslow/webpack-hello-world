@@ -4,6 +4,10 @@
   "description": "Hello Word for Webpack (with Docker)",
   "author": "Allen Parslow",
   "license": "MIT",
+  "repository": {
+    "type": "github",
+    "url": "https://github.com/allen-parslow/webpack-hello-world"
+  },
   "keywords": [
     "webpack",
     "hello",
