@@ -20,7 +20,8 @@
     "clean": "[ -d 'build/' ] && rm -r build/ || :",
     "test": "jest",
     "publish-aws": "./aws/codedeploy-publish.sh allen-parslow-code",
-    "create-aws": "./aws/create-env.sh"
+    "create-aws": "./aws/create-env.sh",
+    "docker": "./aws/run-docker.sh"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
