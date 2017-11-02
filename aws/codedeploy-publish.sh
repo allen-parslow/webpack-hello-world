@@ -28,3 +28,4 @@ aws deploy push --application-name "${npm_package_name}" --description "$artifac
         --ignore-hidden-files --s3-location "s3://$s3bucket/$artifact.zip" --source .
 aws deploy list-application-revisions --application-name ${npm_package_name} | grep key | sort
 
+ls -lth
