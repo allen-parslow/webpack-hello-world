@@ -24,6 +24,7 @@ phases:
     commands:
       - echo Post-build Phase
       - npm run publish-aws
-  artifacts:    
-    files:
-      - 'build/dist/bundle/*'
+artifacts:    
+  files:
+    - 'build/dist/bundle/*'
+  discard-paths: yes
