@@ -23,8 +23,7 @@ phases:
   post_build:
     commands:
       - echo Post-build Phase
-      - ls -ltr aws/
-      - whoami
+      - chmod u+x aws/*.sh
       - npm run publish-aws
 artifacts:    
   files:
