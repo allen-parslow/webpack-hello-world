@@ -24,3 +24,6 @@ phases:
     commands:
       - echo Post-build Phase
       - npm run publish-aws
+  artifacts:    
+    files:
+      - 'build/dist/bundle/*'
