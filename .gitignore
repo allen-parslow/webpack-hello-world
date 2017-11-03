@@ -1,5 +1,8 @@
 .vscode/
+*.iml
+.idea/
 bundle.js
 node_modules
 dist/
 build/
+*.iml

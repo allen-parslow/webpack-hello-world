@@ -18,7 +18,11 @@ Resources:
         Image: 'aws/codebuild/docker:1.12.1'
         Type: LINUX_CONTAINER
       Artifacts:
-        Type: no_artifacts
+        Type: S3
+        Location: 'allen-parslow-codebuild'
+        Name: !Ref 'AWS::StackName'
+        NamespaceType: BUILD_ID
+        Packaging: ZIP
       Source:
         Type: GITHUB
         Location: !Ref 'GitRepoUrl'
@@ -29,14 +33,14 @@ Resources:
   DeploymentGroupSPA:
     Type: 'AWS::CodeDeploy::DeploymentGroup'
     Properties:
-      DeploymentGroupName: !Join [ '-', [ !Ref 'AWS::StackName', !Ref 'StackEnvType' ]]
+      DeploymentGroupName: !Sub '${AWS::StackName}-${StackEnvType}'
       ApplicationName: !Ref AWS::StackName
       DeploymentConfigName: CodeDeployDefault.AllAtOnce
-      ServiceRoleArn: !Join [ ':', [ 'arn:aws:iam:', !Ref 'AWS::AccountId', 'role/deploy' ]]
+      ServiceRoleArn: !Sub  'arn:aws:iam::${AWS::AccountId}:role/deploy'
       Ec2TagFilters:
         - Type: KEY_AND_VALUE
           Key: Name
-          Value: !Join [ '-', [ !Ref 'AWS::StackName', !Ref 'StackEnvType' ]]
+          Value: !Sub '${AWS::StackName}-${StackEnvType}'
     DependsOn:
       - CodeDeploySPA
   USEast1AmazonLinuxEC2SPA:
@@ -44,7 +48,7 @@ Resources:
     Properties:
       ImageId: ami-8c1be5f6
       InstanceType: t2.micro
-      KeyName: us-east-1
+      KeyName: !Ref AWS::Region
       BlockDeviceMappings:
         - DeviceName: /dev/xvda
           Ebs:
@@ -56,12 +60,12 @@ Resources:
       IamInstanceProfile: deploy-target
       Tags:
         - Key: Name
-          Value: !Join [ '-', [ !Ref 'AWS::StackName', !Ref 'StackEnvType' ]]
+          Value: !Sub '${AWS::StackName}-${StackEnvType}'
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash -x
           # TODO use region variable 
-          echo 'start deploytarget_recipe---------------------------'
+          echo 'start deploytarget_recipe in ${AWS::Region} ---------------------------'
           yum update -y
           yum install -y ruby
           yum install -y docker
@@ -71,20 +75,20 @@ Resources:
           aws --version
           mkdir -p /tmp/aws-ec2-setup/ || true
           cd /tmp/aws-ec2-setup/		  
-          wget https://aws-codedeploy-us-east-1.s3.amazonaws.com/latest/install
+          wget https://aws-codedeploy-${AWS::Region}.s3.amazonaws.com/latest/install
           chmod +x ./install
           ./install auto
           service codedeploy-agent status || true
           service codedeploy-agent start || true
           mkdir -p /var/awslogs/etc/config
           cd /tmp/aws-ec2-setup/
-          wget https://s3.amazonaws.com/aws-codedeploy-us-east-1/cloudwatch/codedeploy_logs.conf
+          wget https://s3.amazonaws.com/aws-codedeploy-${AWS::Region}/cloudwatch/codedeploy_logs.conf
           mkdir -p /var/awslogs/etc/config/
           cp codedeploy_logs.conf /var/awslogs/etc/config/
           cd /tmp/aws-ec2-setup/
           wget https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py
           chmod +x ./awslogs-agent-setup.py
-          python awslogs-agent-setup.py -n -r us-east-1 -c s3://aws-codedeploy-us-east-1/cloudwatch/awslogs.conf
+          python awslogs-agent-setup.py -n -r ${AWS::Region} -c s3://aws-codedeploy-${AWS::Region}/cloudwatch/awslogs.conf
           service awslogs restart
           cd /tmp/aws-ec2-setup/
           yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm	
