@@ -27,5 +27,3 @@ echo "Pushing ${npm_package_name} to s3://$s3bucket/$artifact.zip"
 aws deploy push --application-name "${npm_package_name}" --description "$artifact" \
         --ignore-hidden-files --s3-location "s3://$s3bucket/$artifact.zip" --source .
 aws deploy list-application-revisions --application-name ${npm_package_name} | grep key | sort
-
-zip ${npm_package_name}.zip *
