@@ -4,11 +4,21 @@ Parameters:
     Type: String
     Default: dev
     Description: A classifier on the stack-name used to tag instances.
+  ProjectSecurityGroup: 
+    Type: String
+    Default: default
+    Description: Security-group for ec2 for the project
   GitRepoUrl: 
     Type: String
     Description: Github repository url.
+  S3CodeBucketName: 
+    Type: String
+    Description: S3 Code Bucket.
+  ProjectKeyName: 
+    Type: String
+    Description: EC2 key pair name.
 Resources:
-  CodeBuildSPA:
+  AppCodeBuild:
     Type: 'AWS::CodeBuild::Project'
     Properties:
       Name: !Ref AWS::StackName
@@ -19,18 +29,18 @@ Resources:
         Type: LINUX_CONTAINER
       Artifacts:
         Type: S3
-        Location: 'allen-parslow-codebuild'
+        Location: !Sub '${S3CodeBucketName}'
         Name: !Ref 'AWS::StackName'
         NamespaceType: BUILD_ID
         Packaging: ZIP
       Source:
         Type: GITHUB
         Location: !Ref 'GitRepoUrl'
-  CodeDeploySPA:
+  AppCodeDeploy:
     Type: 'AWS::CodeDeploy::Application'
     Properties:
       ApplicationName: !Ref AWS::StackName
-  DeploymentGroupSPA:
+  AppDeploymentGroup:
     Type: 'AWS::CodeDeploy::DeploymentGroup'
     Properties:
       DeploymentGroupName: !Sub '${AWS::StackName}-${StackEnvType}'
@@ -42,13 +52,13 @@ Resources:
           Key: Name
           Value: !Sub '${AWS::StackName}-${StackEnvType}'
     DependsOn:
-      - CodeDeploySPA
-  USEast1AmazonLinuxEC2SPA:
+      - AppCodeDeploy
+  AppAmazonLinuxEC2:
     Type: 'AWS::EC2::Instance'
     Properties:
       ImageId: ami-8c1be5f6
       InstanceType: t2.micro
-      KeyName: !Ref AWS::Region
+      KeyName: !Sub '${ProjectKeyName}'
       BlockDeviceMappings:
         - DeviceName: /dev/xvda
           Ebs:
@@ -56,7 +66,7 @@ Resources:
             VolumeSize: 8
             DeleteOnTermination: true
       SecurityGroups:
-        - my-ip
+        - default
       IamInstanceProfile: deploy-target
       Tags:
         - Key: Name
@@ -64,7 +74,6 @@ Resources:
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash -x
-          # TODO use region variable 
           echo 'start deploytarget_recipe in ${AWS::Region} ---------------------------'
           yum update -y
           yum install -y ruby
