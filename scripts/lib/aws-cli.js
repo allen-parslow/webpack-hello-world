@@ -1,31 +1,6 @@
 /* eslint-disable no-console */
 const _ = require("lodash");
-const spawn = require("cross-spawn");
 
-const executCommand = (cmd, argumentText) => {
-    const args = (argumentText || "").split(" ");
-
-    console.log(`$ ${cmd} ${argumentText}`);
-
-    const result = spawn.sync(cmd, args, {
-        cwd: process.cwd(),
-        stdio: "inherit"
-    });
-
-    if (result.signal) {
-        if (result.signal === "SIGKILL") {
-            console.log("ERROR: SIGKILL");
-        } else if (result.signal === "SIGTERM") {
-            console.log("ERROR: SIGTERM");
-        } process.exit(1);
-    }
-
-    if (result.status !== 0) {
-        process.exit(result.status);
-    }
-
-    console.log("");
-};
 
 const toAwsParams = (obj) => {
     let parameters = "";
@@ -42,6 +17,34 @@ const toAwsParams = (obj) => {
 };
 
 const awsCli = {
+    validatePackageJson: (packageJson) => {
+        if (!packageJson.name) {
+            console.error("package.json name not found");
+            process.exit(1);
+        }
+
+        if (!packageJson.version) {
+            console.error("package.json version not found");
+            process.exit(1);
+        }
+
+        if (! _.get(packageJson, "repository.url")) {
+            console.error("package.json repository.url not found");
+            process.exit(1);
+        }
+    },
+    validateConfig: (awsConfig, requiredAwsConfig) => {
+        _.forEach(requiredAwsConfig, (required) => {
+            const requireValue = awsConfig[required];
+            if (!requireValue) {
+                console.error(`.aws-config ${required} not found in ${JSON.stringify(awsConfig)}`);
+                process.exit(1);
+            } else {
+                console.info(`  ${required}=${requireValue}`);
+            }
+        });
+        console.log(" ");
+    },
     version: () => {
         executCommand("aws", "--version");
     },

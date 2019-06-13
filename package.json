@@ -17,11 +17,11 @@
   "scripts": {
     "start": "cross-env NODE_ENV=development webpack-dev-server --open --config webpack.dev.js",
     "build": "webpack --config webpack.prod.js",
-    "clean": "",
+    "clean": "node scripts/clean.js",
     "test": "jest",
-    "publish-aws": "./aws/codedeploy-publish.sh",
-    "create-aws": "node scripts/create-aws-env.js",
-    "docker": "./aws/run-docker.sh"
+    "publish-aws": "node scripts/aws-publish.js",
+    "create-aws": "node scripts/aws-create-env.js",
+    "docker": "node scripts/docker.js"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
@@ -40,6 +40,7 @@
     "html-webpack-plugin": "^2.30.1",
     "jest": "^21.2.1",
     "lodash": "^4.17.11",
+    "moment": "^2.24.0",
     "node-sass": "^4.5.3",
     "path": "^0.12.7",
     "postcss-loader": "^2.0.6",

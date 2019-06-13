@@ -7,5 +7,6 @@ dist/
 build/
 *.iml
 .aws-config.json
+yarn-error.log
 
 
